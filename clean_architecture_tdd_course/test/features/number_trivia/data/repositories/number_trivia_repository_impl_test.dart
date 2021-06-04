@@ -152,4 +152,121 @@ void main() {
       );
     });
   });
+
+  group('getRandomNumberTrivia', () {
+    final tNumberTriviaModel = NumberTriviaModel(
+      text: 'Test Text',
+      number: 123,
+    );
+    final NumberTrivia tNumberTrivia = tNumberTriviaModel;
+
+    test(
+      'should check if the device is online',
+      () {
+        //Arrange - Setup facts, Put Expected outputs or Initilize
+        when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
+        //Act - Call the function that is to be tested
+        repository.getRandomNumberTrivia();
+        //Assert - Compare the actual result and expected result
+        verify(mockNetworkInfo.isConnected);
+      },
+    );
+
+    void runTestsOnline(Function body) {
+      group('device is online', () {
+        setUp(() {
+          when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
+        });
+
+        body();
+      });
+    }
+
+    void runTestsOffline(Function body) {
+      group('device is offline', () {
+        setUp(() {
+          when(mockNetworkInfo.isConnected).thenAnswer((_) async => false);
+        });
+
+        body();
+      });
+    }
+
+    runTestsOnline(() {
+      test(
+        'should return remote data when the call to remote data source is successful',
+        () async {
+          //Arrange - Setup facts, Put Expected outputs or Initilize
+          when(mockRemoteDataSource.getRandomNumberTrivia())
+              .thenAnswer((realInvocation) async => tNumberTriviaModel);
+          //Act - Call the function that is to be tested
+          final result = await repository.getRandomNumberTrivia();
+          //Assert - Compare the actual result and expected result
+          verify(mockRemoteDataSource.getRandomNumberTrivia());
+          expect(result, Right(tNumberTrivia));
+        },
+      );
+
+      test(
+        'should cache data locally when the call to remote data source is successful',
+        () async {
+          //Arrange - Setup facts, Put Expected outputs or Initilize
+          when(mockRemoteDataSource.getRandomNumberTrivia())
+              .thenAnswer((realInvocation) async => tNumberTriviaModel);
+          //Act - Call the function that is to be tested
+          await repository.getRandomNumberTrivia();
+          //Assert - Compare the actual result and expected result
+          verify(mockRemoteDataSource.getRandomNumberTrivia());
+          verify(mockLocalDataSource.cacheNumberTrivia(tNumberTriviaModel));
+        },
+      );
+
+      test(
+        'should return server failure when the call to remote data source is unsuccessful',
+        () async {
+          //Arrange - Setup facts, Put Expected outputs or Initilize
+          when(mockRemoteDataSource.getRandomNumberTrivia())
+              .thenThrow(ServerException());
+          //Act - Call the function that is to be tested
+          final result = await repository.getRandomNumberTrivia();
+          //Assert - Compare the actual result and expected result
+          verify(mockRemoteDataSource.getRandomNumberTrivia());
+          verifyNoMoreInteractions(mockLocalDataSource);
+          expect(result, Left(ServerFailure()));
+        },
+      );
+    });
+
+    runTestsOffline(() {
+      test(
+        'should return last locally cached data when cached data is present',
+        () async {
+          //Arrange - Setup facts, Put Expected outputs or Initilize
+          when(mockLocalDataSource.getLastNumberTrivia())
+              .thenAnswer((_) async => tNumberTriviaModel);
+          //Act - Call the function that is to be tested
+          final result = await repository.getRandomNumberTrivia();
+          //Assert - Compare the actual result and expected result
+          verifyNoMoreInteractions(mockRemoteDataSource);
+          verify(mockLocalDataSource.getLastNumberTrivia());
+          expect(result, Right(tNumberTrivia));
+        },
+      );
+
+      test(
+        'should return CacheFailure when there is no cached data present',
+        () async {
+          //Arrange - Setup facts, Put Expected outputs or Initilize
+          when(mockLocalDataSource.getLastNumberTrivia())
+              .thenThrow(CacheException());
+          //Act - Call the function that is to be tested
+          final result = await repository.getRandomNumberTrivia();
+          //Assert - Compare the actual result and expected result
+          verifyNoMoreInteractions(mockRemoteDataSource);
+          verify(mockLocalDataSource.getLastNumberTrivia());
+          expect(result, Left(CacheFailure()));
+        },
+      );
+    });
+  });
 }
