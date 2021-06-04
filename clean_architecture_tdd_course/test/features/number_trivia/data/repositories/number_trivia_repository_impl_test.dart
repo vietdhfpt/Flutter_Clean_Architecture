@@ -55,10 +55,27 @@ void main() {
       },
     );
 
-    group('device is online', () {
-      setUp(() {
-        when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
+    void runTestsOnline(Function body) {
+      group('device is online', () {
+        setUp(() {
+          when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
+        });
+
+        body();
       });
+    }
+
+    void runTestsOffline(Function body) {
+      group('device is offline', () {
+        setUp(() {
+          when(mockNetworkInfo.isConnected).thenAnswer((_) async => false);
+        });
+
+        body();
+      });
+    }
+
+    runTestsOnline(() {
       test(
         'should return remote data when the call to remote data source is successful',
         () async {
@@ -103,10 +120,7 @@ void main() {
       );
     });
 
-    group('device is offline', () {
-      setUp(() {
-        when(mockNetworkInfo.isConnected).thenAnswer((_) async => false);
-      });
+    runTestsOffline(() {
       test(
         'should return last locally cached data when cached data is present',
         () async {
