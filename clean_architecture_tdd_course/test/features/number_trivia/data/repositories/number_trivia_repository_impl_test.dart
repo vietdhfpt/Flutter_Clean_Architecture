@@ -47,18 +47,20 @@ void main() {
       'should check if the device is online',
       () {
         //Arrange - Setup facts, Put Expected outputs or Initilize
-        when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
+        when(mockNetworkInfo.isConnected())
+            .thenAnswer((_) => Future.value(true));
         //Act - Call the function that is to be tested
         repository.getConcreteNumberTrivia(tNumber);
         //Assert - Compare the actual result and expected result
-        verify(mockNetworkInfo.isConnected);
+        verify(mockNetworkInfo.isConnected());
       },
     );
 
     void runTestsOnline(Function body) {
       group('device is online', () {
         setUp(() {
-          when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
+          when(mockNetworkInfo.isConnected())
+              .thenAnswer((_) => Future.value(true));
         });
 
         body();
@@ -68,7 +70,8 @@ void main() {
     void runTestsOffline(Function body) {
       group('device is offline', () {
         setUp(() {
-          when(mockNetworkInfo.isConnected).thenAnswer((_) async => false);
+          when(mockNetworkInfo.isConnected())
+              .thenAnswer((_) => Future.value(false));
         });
 
         body();
@@ -164,18 +167,20 @@ void main() {
       'should check if the device is online',
       () {
         //Arrange - Setup facts, Put Expected outputs or Initilize
-        when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
+        when(mockNetworkInfo.isConnected())
+            .thenAnswer((_) => Future.value(true));
         //Act - Call the function that is to be tested
         repository.getRandomNumberTrivia();
         //Assert - Compare the actual result and expected result
-        verify(mockNetworkInfo.isConnected);
+        verify(mockNetworkInfo.isConnected());
       },
     );
 
     void runTestsOnline(Function body) {
       group('device is online', () {
         setUp(() {
-          when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
+          when(mockNetworkInfo.isConnected())
+              .thenAnswer((_) => Future.value(true));
         });
 
         body();
@@ -185,7 +190,8 @@ void main() {
     void runTestsOffline(Function body) {
       group('device is offline', () {
         setUp(() {
-          when(mockNetworkInfo.isConnected).thenAnswer((_) async => false);
+          when(mockNetworkInfo.isConnected())
+              .thenAnswer((_) => Future.value(false));
         });
 
         body();
