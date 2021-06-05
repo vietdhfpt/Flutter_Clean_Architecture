@@ -45,8 +45,7 @@ void main() {
       //Act - Call the function that is to be tested
       final call = dataSource.getLastNumberTrivia;
       //Assert - Compare the actual result and expected result
-      // ignore: deprecated_member_use
-      expect(() => call(), throwsA(TypeMatcher<CacheException>()));
+      expect(() => call(), throwsA(isA<CacheException>()));
     });
   });
 
